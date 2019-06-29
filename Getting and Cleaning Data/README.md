@@ -16,4 +16,7 @@
 4. The README that explains the analysis files is clear and understandable.
 5. The work submitted for this project is the work of the student who submitted it.
 
+### Data source
+https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
+
 ### Comments on run_analysis.R is included in the Codebook.
