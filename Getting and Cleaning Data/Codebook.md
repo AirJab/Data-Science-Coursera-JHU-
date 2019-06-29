@@ -18,7 +18,7 @@ The sensor signals (accelerometer and gyroscope) were pre-processed by applying 
 - An identifier of the subject who carried out the experiment.
 
 ### The dataset includes the following files:
-=============================================================================================================================================================
+============================================================================================================================
 
 - 'README.txt'
 
@@ -47,3 +47,15 @@ The sensor signals (accelerometer and gyroscope) were pre-processed by applying 
 - 'train/Inertial Signals/body_gyro_x_train.txt': The angular velocity vector measured by the gyroscope for each window sample. The units are radians/second. 
 
 =====================================================================================
+
+
+### On run_analysis.R
+
+1. Feature, activity, and subject datasets are loaded from the text files.
+2. The train and test datasets are for each item mentioned above are merged.
+3. Subset of the modified features dataset is considered which contains features related to the mean and standard deviaiton.
+4. Modified feature, activity, and subject datasets are all merged to one single dataset and is arranged.
+5. The single dataset is grouped by subject and activity, and averages of the features are calculated.
+6. The tidy dataset is produced.
+
+=======================================================================================
