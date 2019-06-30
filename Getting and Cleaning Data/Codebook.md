@@ -56,6 +56,7 @@ The sensor signals (accelerometer and gyroscope) were pre-processed by applying 
 3. Subset of the modified features dataset is considered which contains features related to the mean and standard deviaiton.
 4. Modified feature, activity, and subject datasets are all merged to one single dataset and is arranged.
 5. The single dataset is grouped by subject and activity, and averages of the features are calculated.
-6. The tidy dataset is produced.
+6. Renaming variables with descriptive names.
+7. The tidy dataset is produced.
 
 =======================================================================================
