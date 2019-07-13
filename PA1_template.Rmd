@@ -1,0 +1,13 @@
+---
+title: "Project 1"
+output: github_document
+---
+###Loading and preprocessing the data
+
+###Loading libraries
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(VIM)
+```
