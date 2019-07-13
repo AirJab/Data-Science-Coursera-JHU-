@@ -1,192 +1,197 @@
-Project 1
-================
+---
+title: "Project 1"
+output: 
+  html_document: 
+    keep_md: true
+---
 
-### Loading libraries
+###Loading libraries
 
-``` r
+```r
 library(ggplot2, quietly = TRUE)
 library(dplyr,quietly = TRUE)
 library(lubridate,quietly = TRUE)
 library(VIM,quietly = TRUE)
 ```
 
-### Loading and preprocessing the data
+###Loading and preprocessing the data
 
-``` r
+```r
 act <- data.table :: fread("./activity.csv")
 ```
 
-### Converting date from chracter to Date class
+###Converting date from chracter to Date class 
 
-``` r
+```r
 act$date <- lubridate :: ymd(act$date)
 ```
 
-What is mean total number of steps taken per day?
--------------------------------------------------
+##What is mean total number of steps taken per day?
 
-### Total steps per day
+###Total steps per day
 
-``` r
+```r
 Total_steps <- aggregate(act$steps, FUN = sum, list(Day = act$date), na.rm=T)
 ```
+###Plotting Hitogram for total daily steps
 
-### Plotting Hitogram for total daily steps
-
-``` r
+```r
 ggplot(Total_steps,aes(x)) + 
         geom_histogram(binwidth=2000 ,fill="red",
         colour="black", size=1) + labs(title="Histogram of Total Daily Steps",
         x="Total Daily Steps", y="Frequency")
 ```
 
-![](PA1_template_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
-### Calculating and reporting the mean and median of TotalDaily Steps
+###Calculating and reporting the mean and median of TotalDaily Steps
 
-``` r
+```r
 mean_1 <- mean(Total_steps$x)
 median_1 <- median(Total_steps$x)
 ```
+###Mean
 
-### Mean
-
-``` r
+```r
 mean_1
 ```
 
-    ## [1] 9354.23
+```
+## [1] 9354.23
+```
+###Median
 
-### Median
-
-``` r
+```r
 median_1
 ```
 
-    ## [1] 10395
+```
+## [1] 10395
+```
+##What is the average daily activity pattern?
 
-What is the average daily activity pattern?
--------------------------------------------
+###Constructing a dataframe for Average Daily Activity Pattern
 
-### Constructing a dataframe for Average Daily Activity Pattern
-
-``` r
+```r
 Avg_steps <- aggregate(act$steps,
         FUN = mean, list(Interval = act$interval), na.rm=T)
 ```
 
-### Line plot for Average Daily Activity Pattern
+###Line plot for Average Daily Activity Pattern
 
-``` r
+```r
 ggplot(Avg_steps, aes(Interval, x)) + geom_line(colour="blue",size=1) +
     labs(title = "Average Daily Activity Pattern", y="Average number of steps")
 ```
 
-![](PA1_template_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
-### The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps
+###The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps
 
-``` r
+```r
 Avg_steps$Interval[Avg_steps$x==max(Avg_steps$x)]
 ```
 
-    ## [1] 835
+```
+## [1] 835
+```
 
-Imputing missing values
------------------------
+##Imputing missing values
 
-### Number of "NA" present
+###Number of "NA" present
 
-``` r
+```r
 length(act$steps[act$steps == "NA"])
 ```
 
-    ## [1] 2304
+```
+## [1] 2304
+```
+###Creating a new dataframe by imputing missing values by K-Nearest Neighbour method
 
-### Creating a new dataframe by imputing missing values by K-Nearest Neighbour method
-
-``` r
+```r
 act_imputed <- kNN(act, variable="steps", k=5)
 ```
 
-### Total steps per day (imputed)
+###Total steps per day (imputed)
 
-``` r
+```r
 Total_steps_imputed <- aggregate(act_imputed$steps, FUN = sum, list(Day = act_imputed$date), na.rm=T)
 ```
 
-### Plotting Hitogram for total daily steps (imputed)
+###Plotting Hitogram for total daily steps (imputed)
 
-``` r
+```r
 ggplot(Total_steps_imputed,aes(x)) + 
     geom_histogram(binwidth=2000 ,fill="red",
     colour="black", size=1) + labs(title="Histogram of Total Daily Steps (with imputed              data)",x="Total Daily Steps", y="Frequency")
 ```
 
-![](PA1_template_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
-### Calculating and reporting the mean and median of Total Daily Steps (Imputed)
+###Calculating and reporting the mean and median of Total Daily Steps (Imputed)
 
-``` r
+```r
 mean_2 <- mean(Total_steps_imputed$x)
 median_2 <- median(Total_steps_imputed$x)
 ```
+####Mean (imputed):
 
-#### Mean (imputed):
-
-``` r
+```r
 mean_2
 ```
 
-    ## [1] 9752.393
+```
+## [1] 9752.393
+```
+####Median (imputed):
 
-#### Median (imputed):
-
-``` r
+```r
 median_2
 ```
 
-    ## [1] 10395
+```
+## [1] 10395
+```
+###Difference in mean, mean(imputed) - mean(original)
 
-### Difference in mean, mean(imputed) - mean(original)
 
-``` r
+```r
 mean_2 - mean_1
 ```
 
-    ## [1] 398.1639
+```
+## [1] 398.1639
+```
+###Difference in median, median(imputed) - median(original)
+median_2-median_1
 
-### Difference in median, median(imputed) - median(original)
 
-median\_2-median\_1
+###There is was no change in the mdian after imputation, but the mean increased by 398.1639
 
-### There is was no change in the mdian after imputation, but the mean increased by 398.1639
+##Are there differences in activity patterns between weekdays and weekends?
 
-Are there differences in activity patterns between weekdays and weekends?
--------------------------------------------------------------------------
+###Creating factor variables with two levels - weekday and weekend
 
-### Creating factor variables with two levels - weekday and weekend
-
-``` r
+```r
 act_imputed$Day_Factor <- ifelse(weekdays(act$date) %in% 
                 c("Sunday","Saturday"), "weekend","weekday")
 ```
+###Constructing a dataframe for Average Daily Activity Pattern for weekdays and weekends
 
-### Constructing a dataframe for Average Daily Activity Pattern for weekdays and weekends
-
-``` r
+```r
 Avg_steps_imputed_days <- aggregate(act_imputed$steps,
                             FUN = mean, list(Interval = act_imputed$interval,
                             Day=act_imputed$Day_Factor),  na.rm=T)
 ```
+###Line plot for Average Daily Activity Pattern (with imputed steps) with breakdown in weekday and weekend 
 
-### Line plot for Average Daily Activity Pattern (with imputed steps) with breakdown in weekday and weekend
-
-``` r
+```r
 ggplot(Avg_steps_imputed_days, aes(Interval, x,colour=factor(Day))) + geom_line(size=1) +
     facet_wrap(~Day, ncol = 1, nrow=2)+
     labs(title = "Average Daily Activity Pattern (with imputed data)", 
     y="Average number of steps", color="Day")
 ```
 
-![](PA1_template_files/figure-markdown_github/unnamed-chunk-22-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+    
