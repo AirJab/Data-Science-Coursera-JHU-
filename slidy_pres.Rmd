@@ -1,0 +1,145 @@
+---
+title: "Project - Developing Data Products"
+author: "Mahir Musleh"
+date: "July 30, 2019"
+output:
+  slidy_presentation: default
+  ioslides_presentation: default
+  beamer_presentation: default
+  keep_md: TRUE
+---
+
+```{r setup, include=FALSE}
+
+library(plotly)
+library(dplyr)
+library(leaflet)
+library(data.table)
+library(rgdal)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+###Project Goals
+-**Take a look how some Canadian provinces' population changed overtime**      
+-**Take a look at some regression about what affects the Canadian GNI per capita**  
+We will be using shiny application to create a slider to change the quarter to produce te desired effect on the interactive map. We also will create two additional tabs to inform people about the regression analysis done and plot created on GNI per capita.  
+
+
+##Population eh!
+**Codes for interactive map generation**
+```{r warning=FALSE,message=FALSE,echo=TRUE, cache=TRUE, eval=FALSE}
+
+
+prov.pop <- fread("./can_pop.csv",stringsAsFactors = FALSE)
+
+colnames(prov.pop)[1] <- "Province"
+
+prov.pop[] <- lapply(prov.pop, function(x) gsub(",","",x))
+
+prov.pop[] <- lapply(prov.pop, function(x) as.character(x))
+prov.pop[,2:272] <- lapply(prov.pop[,2:272], function(x) as.numeric(x))
+
+region <- readOGR("./src/ref/ne_50m_admin_1_states_provinces_lakes", encoding='UTF-8')
+
+
+prov.pop %>% leaflet() %>% 
+    addTiles() %>% 
+    setView(-100, 62,  zoom = 3) %>% 
+    addPolygons(data = subset(region, name %in% c("Quebec","British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Prince Edward Island", "Nova Scotia", "Newfoundland and Labrador", "Yukon", "Northwest Territories", "Nunavut")), 
+                fillColor = topo.colors(15, alpha = NULL),
+                weight = 1) %>%
+    addCircles(popup = paste0(prov.pop$Province),
+               weight = 4,
+               radius = (prov.pop$`1952 Q1`)*.015,color = "red")
+                                    
+
+```
+
+##Population eh!
+
+**The shiny app will have a slider to change the quarter of the year and the population change, represented by the size of the circle, will change.**
+
+
+```{r warning=FALSE,message=FALSE, cache =TRUE,results='hide'}
+suppressMessages(region <- readOGR("./src/ref/ne_50m_admin_1_states_provinces_lakes", encoding='UTF-8'))
+```
+
+```{r warning=FALSE,message=FALSE}
+
+library(plotly)
+library(dplyr)
+library(leaflet)
+library(data.table)
+library(rgdal)
+
+prov.pop <- fread("./can_pop.csv",stringsAsFactors = FALSE)
+
+colnames(prov.pop)[1] <- "Province"
+
+prov.pop[] <- lapply(prov.pop, function(x) gsub(",","",x))
+
+prov.pop[] <- lapply(prov.pop, function(x) as.character(x))
+prov.pop[,2:272] <- lapply(prov.pop[,2:272], function(x) as.numeric(x))
+
+prov.pop %>% leaflet() %>% 
+    addTiles() %>% 
+    setView(-100, 62,  zoom = 3) %>% 
+    addPolygons(data = subset(region, name %in% c("Quebec","British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Prince Edward Island", "Nova Scotia", "Newfoundland and Labrador", "Yukon", "Northwest Territories", "Nunavut")), 
+                fillColor = topo.colors(15, alpha = NULL),
+                weight = 1) %>%
+    addCircles(popup = paste0(prov.pop$Province),
+               weight = 4,
+               radius = (prov.pop$`1952 Q1`)*.015,color = "red")
+                                    
+
+```
+
+
+
+##Summary aqnd plot of the linear regression model for GNI per capita    
+**Data: World Bank Databank**
+
+Values were converted into logarithm form first    
+
+**Summary**
+
+```{r warning=FALSE,message=FALSE, cache=TRUE, comment = ""}
+indicator <- data.table::fread("./can_indicators.csv")
+
+indicator.1 <- data.frame(t(indicator))
+
+colnames(indicator.1) <- as.character(unlist(indicator.1[1,]))
+indicator.1 = indicator.1[-1, ]
+
+colnames(indicator.1) <- c("Year","GNI","EXP" ,"IMP","CONS","GEXP","INV")
+
+indicator.1[] <- lapply(indicator.1, function(x) as.numeric(as.character(x)))
+
+
+indicator.1[,-1]<- lapply(indicator.1[,-1],function(x) log(x))
+
+model.1 <- lm(GNI~.-Year, data=indicator.1)
+
+summary(model.1)
+
+
+
+```
+    
+**Plot**  
+```{r warning=FALSE,message=FALSE, cache=TRUE}
+p <- plot_ly(data = indicator.1, x = ~CONS, y = ~GNI,
+             size = ~INV,color=~GEXP) %>%
+    layout(title="GNI, Consumption, Governmet Expenditure, and Investment for Canada",
+           xaxis= list(title="Consumption"),yaxis=list(title="Gross National Income"))
+
+
+p <- layout(p, annotations = 
+                list(x=1.05,y=.1,text = "Data: World Bank Databank\n
+                     -The size of the scatter represents Investment\n
+                     -The colour represents Government Expenditure", 
+                showarrow = F, xref='paper', yref='paper', 
+                xanchor='right', yanchor='auto', xshift=1, yshift=1,
+                font=list(size=10, color="black")))
+p
+```
